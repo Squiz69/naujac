@@ -390,8 +390,11 @@ void PEMapper::ZeroMemory(HANDLE targetProcess) {
     SecureZeroMemory(zeroBuffer.data(), zeroBuffer.size());
     
     SIZE_T bytesWritten;
-    WriteProcessMemory(targetProcess, m_baseAddress, zeroBuffer.data(), 
-        zeroBuffer.size(), &bytesWritten);
+    if (!WriteProcessMemory(targetProcess, m_baseAddress, zeroBuffer.data(), 
+        zeroBuffer.size(), &bytesWritten)) {
+        std::cerr << "[!] Failed to zero memory: " << GetLastError() << std::endl;
+        return;
+    }
     
     std::cout << "[+] Memory region zeroed: " << bytesWritten << " bytes" << std::endl;
 }
