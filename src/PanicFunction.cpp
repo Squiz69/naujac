@@ -26,10 +26,8 @@ bool PanicFunction::Execute(ThreadHijacker& hijacker, PEMapper& mapper, HANDLE t
     }
     
     // Step 3: Free remote memory
-    if (mapper.GetEntryPoint()) {
-        LPVOID baseAddress = reinterpret_cast<LPVOID>(
-            reinterpret_cast<uintptr_t>(mapper.GetEntryPoint()) - 0x1000 // Approximate
-        );
+    LPVOID baseAddress = mapper.GetBaseAddress();
+    if (baseAddress) {
         if (!FreeRemoteMemory(targetProcess, baseAddress)) {
             std::cerr << "[!] Failed to free remote memory" << std::endl;
             success = false;

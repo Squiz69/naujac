@@ -17,8 +17,13 @@ BOOL APIENTRY DllMain(HMODULE hModule, DWORD ul_reason_for_call, LPVOID lpReserv
         case DLL_PROCESS_ATTACH:
             // Code to run when DLL is loaded
             {
+                // Get system temp directory
+                char tempPath[MAX_PATH];
+                GetTempPathA(MAX_PATH, tempPath);
+                std::string logFilePath = std::string(tempPath) + "injection_proof.txt";
+                
                 // Create a simple log file to prove injection worked
-                std::ofstream logFile("C:\\Temp\\injection_proof.txt", std::ios::app);
+                std::ofstream logFile(logFilePath, std::ios::app);
                 if (logFile.is_open()) {
                     logFile << "[+] DLL Successfully Injected!" << std::endl;
                     logFile << "[+] Process ID: " << GetCurrentProcessId() << std::endl;
@@ -47,7 +52,11 @@ BOOL APIENTRY DllMain(HMODULE hModule, DWORD ul_reason_for_call, LPVOID lpReserv
         case DLL_PROCESS_DETACH:
             // Code to run when DLL is unloaded
             {
-                std::ofstream logFile("C:\\Temp\\injection_proof.txt", std::ios::app);
+                char tempPath[MAX_PATH];
+                GetTempPathA(MAX_PATH, tempPath);
+                std::string logFilePath = std::string(tempPath) + "injection_proof.txt";
+                
+                std::ofstream logFile(logFilePath, std::ios::app);
                 if (logFile.is_open()) {
                     logFile << "[+] DLL Detached/Unloaded" << std::endl;
                     logFile.close();

@@ -1,4 +1,5 @@
 #include <iostream>
+#include <sstream>
 #include <windows.h>
 #include <string>
 #include "NetworkStream.h"
@@ -179,9 +180,22 @@ int main(int argc, char* argv[]) {
     std::cout << std::endl;
     std::cout << "╔══════════════════════════════════════════════════════════════════╗" << std::endl;
     std::cout << "║ DLL successfully injected via thread hijacking                   ║" << std::endl;
-    std::cout << "║ Base Address: 0x" << std::hex << baseAddress << std::dec << std::string(43, ' ') << "║" << std::endl;
-    std::cout << "║ Entry Point:  0x" << std::hex << entryPoint << std::dec << std::string(43, ' ') << "║" << std::endl;
-    std::cout << "╚══════════════════════════════════════════════════════════════════╝" << std::endl;
+    
+    // Format base address with proper padding
+    std::stringstream baseAddrStream;
+    baseAddrStream << std::hex << baseAddress;
+    std::string baseAddrStr = baseAddrStream.str();
+    int basePadding = 51 - baseAddrStr.length();
+    std::cout << "║ Base Address: 0x" << baseAddrStr << std::string(basePadding, ' ') << "║" << std::endl;
+    
+    // Format entry point with proper padding
+    std::stringstream entryPointStream;
+    entryPointStream << std::hex << entryPoint;
+    std::string entryPointStr = entryPointStream.str();
+    int entryPadding = 51 - entryPointStr.length();
+    std::cout << "║ Entry Point:  0x" << entryPointStr << std::string(entryPadding, ' ') << "║" << std::endl;
+    
+    std::cout << std::dec << "╚══════════════════════════════════════════════════════════════════╝" << std::endl;
     
     // Wait for panic function activation
     ExecutePanicOnKeyPress(hijacker, mapper, targetProcess);

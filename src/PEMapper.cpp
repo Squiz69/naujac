@@ -51,6 +51,9 @@ LPVOID PEMapper::MapDLL(const std::vector<uint8_t>& dllBuffer, HANDLE targetProc
     LPVOID preferredBase = reinterpret_cast<LPVOID>(ntHeaders->OptionalHeader.ImageBase);
     
     // Allocate memory in target process
+    // Note: Using PAGE_EXECUTE_READWRITE for simplicity. In production,
+    // SetSectionProtections() should be called to set proper per-section protections
+    // (.text = PAGE_EXECUTE_READ, .data = PAGE_READWRITE, .rdata = PAGE_READONLY)
     m_baseAddress = VirtualAllocEx(
         targetProcess,
         nullptr,
@@ -258,8 +261,10 @@ bool PEMapper::ResolveImports(LPVOID baseAddress, HANDLE targetProcess) {
                 );
                 
                 SIZE_T bytesWritten;
-                WriteProcessMemory(targetProcess, currentIATAddr, &functionAddr, 
-                    sizeof(functionAddr), &bytesWritten);
+                if (!WriteProcessMemory(targetProcess, currentIATAddr, &functionAddr, 
+                    sizeof(functionAddr), &bytesWritten)) {
+                    std::cerr << "[!] Failed to write IAT entry: " << GetLastError() << std::endl;
+                }
             }
             
             thunkIndex++;
@@ -351,8 +356,10 @@ bool PEMapper::ApplyRelocations(LPVOID baseAddress, LPVOID preferredBase, HANDLE
                     sizeof(originalValue), &bytesRead)) {
                     uintptr_t newValue = originalValue + delta;
                     SIZE_T bytesWritten;
-                    WriteProcessMemory(targetProcess, patchAddr, &newValue, 
-                        sizeof(newValue), &bytesWritten);
+                    if (!WriteProcessMemory(targetProcess, patchAddr, &newValue, 
+                        sizeof(newValue), &bytesWritten)) {
+                        std::cerr << "[!] Failed to apply relocation: " << GetLastError() << std::endl;
+                    }
                 }
             }
         }

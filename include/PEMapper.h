@@ -34,6 +34,12 @@ public:
     LPVOID GetEntryPoint() const { return m_entryPoint; }
 
     /**
+     * @brief Gets the base address where DLL was mapped
+     * @return Base address of the mapped DLL
+     */
+    LPVOID GetBaseAddress() const { return m_baseAddress; }
+
+    /**
      * @brief Zeros the mapped memory region (for panic function)
      * @param targetProcess Handle to target process
      */
